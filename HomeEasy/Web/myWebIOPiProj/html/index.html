@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
+    <title>Domo | WebIOPi</title>
+    <script type="text/javascript" src="/webiopi.js"></script>
+    <script type="text/javascript"></script>
+
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+
+     <script src="js/mobiscroll.core.js"></script>
+    <script src="js/mobiscroll.scroller.js" type="text/javascript"></script>
+
+    <script src="js/mobiscroll.datetime.js" type="text/javascript"></script>
+    <script src="js/mobiscroll.select.js" type="text/javascript"></script>
+
+    <script src="js/mobiscroll.scroller.jqm.js" type="text/javascript"></script>
+
+
+
+    <link href="css/mobiscroll.scroller.css" rel="stylesheet" type="text/css" />
+    <link href="css/mobiscroll.scroller.jqm.css" rel="stylesheet" type="text/css" />
+    <link href="css/mobiscroll.animation.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+
+  <script>
+
+    var STATE_UNDEFINED = -1
+    var STATE_ON = 1
+    var STATE_OFF = 0
+
+    //--------------------------------------
+    //---- SENDING FUNCTIONS
+    //--------------------------------------
+
+    function sendSchedule(channel,val)
+    {
+      //webiopi().callMacro("setChannelSchedule", val);
+    }
+
+    function sendOutputState(channel, val)
+    {
+      //var payload = [channel,val]
+      webiopi().callMacro("setChannel");//, payload);
+    }
+
+    //--------------------------------------
+    //---- CALL BACKS
+    //--------------------------------------
+
+    function setInitialStateCallBack(macro, args, data)
+    {
+      alert(macro + "returned with" + data);
+    }
+
+    //--------------------------------------
+    //---- EVENTS FUNCTIONS
+    //--------------------------------------
+
+    function checkBoxEnableSystemEvent()
+    {
+      setEnableSystem(document.getElementById("enableSystem").checked);
+    }
+
+    function checkBoxEnableChn1Event()
+    {
+      setEnableChannel1(document.getElementById("enableChn1").checked);
+    }
+
+    function switchOnMFunc()
+    {
+      sendOutputState('M',true);
+    }
+
+    function switchOffMFunc()
+    {
+      sendOutputState('M',false);
+    }
+
+    function switchOn1Func()
+    {
+      sendOutputState('1',true);
+    }
+
+    function switchOff1Func()
+    {
+      sendOutputState('1',false);
+    }
+
+    function clear1Func()
+    {
+      document.getElementById('startHourChn1').value = "";
+      document.getElementById('stopHourChn1').value = "";
+
+      sendSchedule('1', "");
+    }
+
+    function update1Func()
+    {
+      alert( document.getElementById('startHourChn1').value + "--" + 
+                        document.getElementById('stopHourChn1').value);
+      
+      sendSchedule('1', document.getElementById('startHourChn1').value + "--" + 
+                        document.getElementById('stopHourChn1').value);
+    }
+
+    //--------------------------------------
+    //Se ejecuta durate la carga de la web
+    //--------------------------------------
+    $(document).on('ready', function()
+    {
+      //--------- Estado inicial del sistema
+      setEnableSystem(false);
+      //webiopi().callMacro("getSystemState", '', setInitialStateCallBack);
+
+      //--------- Hacemos los bind de las funciones a los controles
+
+      $("#enableSystem").bind( "change", function(event, ui) 
+      {
+        checkBoxEnableSystemEvent();
+      });
+
+
+      $("#enableChn1").bind( "change", function(event, ui) 
+      {
+        checkBoxEnableChn1Event();
+      });
+
+    });
+
+    //Se ejecuta cada vez que hay un evento sobre los 
+    // elementos que deriban de demo-test-time
+    $(function () 
+    {
+      $('.demo-test-time').scroller('destroy').scroller($.extend(
+      {
+        preset: 'time'
+      }
+      ,
+      {
+        theme:'jqm',
+        mode: 'scroller',
+        lang: '',
+        display: 'bubble',
+        animate: ''
+      }));
+
+      $('.demo-time').show();
+    });
+
+    //--------------------------------------
+    //---- AUXILIAR FUNCTIONS
+    //--------------------------------------
+
+    //---- Habilita y deshabilita el canal 1
+
+    function setEnableChannel1(val)
+    {
+      if(val &&  document.getElementById("enableChn1").checked) 
+      {
+          document.getElementById("startHourChn1").disabled = false;
+          document.getElementById("stopHourChn1").disabled = false;
+          $("#switchOn1").prop("disabled",false).button("refresh");
+          $("#switchOff1").prop("disabled",false).button("refresh");      
+          $("#update1").prop("disabled",false).button("refresh");
+          $("#clear1").prop("disabled",false).button("refresh");        
+
+          //Se envía el estado del canal y el schedule //////////////////////
+          update1Func();
+      }
+      else
+      {
+        document.getElementById("startHourChn1").disabled = true;
+          document.getElementById("stopHourChn1").disabled = true;
+        $("#switchOn1").prop("disabled",true).button("refresh");
+        $("#switchOff1").prop("disabled",true).button("refresh");
+        $("#update1").prop("disabled",true).button("refresh");
+        $("#clear1").prop("disabled",true).button("refresh"); 
+
+        //Se envia canal off y schedule en blanco //////////////////////
+        sendOutputState('1',false);
+      }
+    }
+
+    //---- Habilita y deshabilita el systema
+
+    function setEnableSystem(val)
+    {
+      $("#enableChn1").prop("disabled",!val).checkboxradio("refresh");
+      $("#switchOnM").prop("disabled",!val).button("refresh");
+      $("#switchOffM").prop("disabled",!val).button("refresh");
+      setEnableChannel1(val);
+    }
+
+  </script>
+    
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+
+  <style>
+
+    /*esto es para eliminar los textbox*/
+    /*input.ui-slider-input 
+    {
+        display : none !important;
+    }
+    */
+
+    .channelCtrl
+    {
+      border:2px solid #a1a1a1;
+      padding:0px 10px;
+      border-radius:12px;
+      box-shadow: 10px 10px 5px #111111;
+    }
+
+  </style>
+
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+
+
+  <body>
+    <div data-role="page" data-theme="a">
+      <div data-role="header" data-theme="a">
+        <h2>Domo | WebioPI</h2>
+      </div>
+
+      <!-- //////////////////  -->
+
+      <div data-role="content" data-theme="a">
+
+        <div class="ui-grid-a" style = "text-align: center;">
+          <div class="ui-block-a" style = "text-align: left;">
+            <label><input type="checkbox" id="enableSystem" />Domo WebioPI</label>
+          </div>
+          <div class="ui-block-b" style = "text-align: right;">
+            <div class="ui-grid-a" style = "text-align: center;">
+              <div class="ui-block-a" style = "text-align: left;">
+                <button onclick="switchOnMFunc()" id = "switchOnM" >ALL CHANNELS ON</button>
+              </div>
+              <div class="ui-block-b" style = "text-align: right;">
+                <button onclick="switchOffMFunc()" id = "switchOffM" >ALL CHANNELS OFF</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <br><br><br>
+        </div>
+
+        <!-- ***********  -->
+        <!-- CHANNEL 1    -->
+        <!-- ***********  -->
+        <!-- ***********  -->
+
+        <div class = "channelCtrl" style=" ">
+
+          <!-- ***********  -->
+
+          <div class="ui-grid-a" style = "text-align: center;">
+            <div class="ui-block-a" style = "text-align: left;">
+            </div>
+            <div class="ui-block-b" style = "text-align: right;">
+              <label><input type="checkbox" id="enableChn1" />Channel One</label>
+            </div>
+          </div>  
+
+          <!-- ***********  -->  
+
+          <div class="ui-grid-c" style = "text-align: center;color:#616161">
+            <div class="ui-block-a">
+              <h3>Set state</h3>
+            </div>
+          </div>       
+
+          <div class="ui-grid-c" style = "text-align: center;">
+            <div class="ui-block-a">
+              <button onclick="switchOn1Func()" id = "switchOn1" >ON</button>
+            </div>
+            <div class="ui-block-b">
+              <button onclick="switchOff1Func()" id = "switchOff1" >OFF</button>
+            </div>
+          </div> 
+
+          <div class="ui-grid-c" style = "text-align: center;color:#616161">
+            <div class="ui-block-a">
+              <h3>Set schedule</h3>
+            </div>
+            <div class="ui-block-b" >
+            </div> 
+            <div class="ui-block-c" >
+              <h4>Start time</h4>
+            </div>        
+            <div class=" ui-block-d ">
+              <h4>Stop time</h4>
+            </div>
+          </div>
+
+          <div class="settings" >
+            <div class="ui-grid-c" style = "text-align: center;">
+              <div class="ui-block-a">
+                <button onclick="update1Func()" id = "update1" >Update</button>
+              </div>
+              <div class="ui-block-b">
+                <button onclick="clear1Func()" id = "clear1" >Clear</button>
+              </div>
+              <div class="ui-block-c" >
+                <input type="text" name="startHourChn1" id="startHourChn1" value="" class="demo-test-time"  style = "text-align: center;" />
+              </div>        
+              <div class=" ui-block-d ">
+                <input type="text" name="stopHourChn1" id="stopHourChn1" value="" class="demo-test-time" style = "text-align: center;" />
+              </div>
+            </div>
+
+        </div>
+
+        <!-- ***********  -->
+        <!-- END CHANNEL 1-->
+        <!-- ***********  -->
+        <!-- ***********  -->
+
+        <div>
+          <br><br>
+        </div>
+
+      </div>
+
+      <!-- //////////////////  -->
+
+      <div data-role="footer">
+          <h1>Powered by TT</h1>
+      </div>
+
+      <!-- //////////////////  -->
+
+    </div>  <!-- div page -->
+  </body>
+</html>    
+

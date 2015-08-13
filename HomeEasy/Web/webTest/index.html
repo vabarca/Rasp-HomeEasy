@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
+    <title>Domo | WebIOPi</title>
+    <script type="text/javascript" src="/webiopi.js"></script>
+    <script type="text/javascript"></script>
+
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+
+     <script src="js/mobiscroll.core.js"></script>
+    <script src="js/mobiscroll.scroller.js" type="text/javascript"></script>
+
+    <script src="js/mobiscroll.datetime.js" type="text/javascript"></script>
+    <script src="js/mobiscroll.select.js" type="text/javascript"></script>
+
+    <script src="js/mobiscroll.scroller.jqm.js" type="text/javascript"></script>
+
+
+
+    <link href="css/mobiscroll.scroller.css" rel="stylesheet" type="text/css" />
+    <link href="css/mobiscroll.scroller.jqm.css" rel="stylesheet" type="text/css" />
+    <link href="css/mobiscroll.animation.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+
+  <script>
+
+    //--------------------------------------
+    //---- Funciones de lectura de valores
+    //--------------------------------------
+
+    function getChn1Status()
+    {
+      return document.getElementById("enableChn1").checked;
+    }
+
+    function getChn1HourAStatus()
+    {
+      return document.getElementById("enableChn1HourA").checked;
+    }
+
+    function getChn1HourBStatus()
+    {
+      return document.getElementById("enableChn1HourB").checked;
+    }
+
+    function getOutputStateChn1()
+    {
+      return (document.getElementById("outputStateChn1").value == 'on')
+    }
+
+    //--------------------------------------
+    //---- Funciones de seteado de valores
+    //--------------------------------------
+
+    function setOutputStateChn1(val)
+    {
+      if(val)
+        $("#outputStateChn1").val('on').slider("refresh");
+      else
+        $("#outputStateChn1").val('off').slider("refresh");
+    }
+
+    function setChn1Status(val)
+    {
+      if(val)
+      {
+        $("#enableChn1").prop( "checked", true ).checkboxradio( "refresh" );
+        enableChannel1();
+      }
+      else
+      {
+        $("#enableChn1").prop( "checked", false ).checkboxradio( "refresh" );
+        disableChannel1();
+      }
+    }
+
+    function setChn1HourStatus(valA,valB)
+    {
+      if(valA)
+      {
+        $("#enableChn1HourA").prop( "checked", true ).checkboxradio( "refresh" );
+        enableChannel1HourCtrlA();
+      }
+      else
+      {
+        $("#enableChn1HourA").prop( "checked", false ).checkboxradio( "refresh" );
+        disableChannel1HourCtrlA
+      }
+
+      if(valB)
+      {
+        $("#enableChn1HourB").prop( "checked", true ).checkboxradio( "refresh" );
+        enableChannel1HourCtrlB();
+      }
+      else
+      {
+        $("#enableChn1HourB").prop( "checked", false ).checkboxradio( "refresh" );
+        disableChannel1HourCtrlB
+      }
+    }
+
+    //--------------------------------------
+    //------- Actualiza el estado en función 
+    // de los valores que se hayan seteado
+    //--------------------------------------
+
+    function updateStatusChn1()
+    {
+      if(getChn1Status()) 
+        enableChannel1();
+      else 
+        disableChannel1();
+    }
+
+    function updateStatusChn1Hour()
+    {
+      if(getChn1HourAStatus())
+        enableChannel1HourCtrlA();
+      else
+        disableChannel1HourCtrlA();
+      if(getChn1HourBStatus())
+        enableChannel1HourCtrlB();
+      else
+        disableChannel1HourCtrlB();
+    }
+
+    //--------------------------------------
+    //---- Habilita y deshabilita los selectores de hora del canal 1
+    //--------------------------------------
+    function disableChannel1HourCtrlA()
+    {
+      document.getElementById("startHourChn1A").disabled = true;
+      document.getElementById("stopHourChn1A").disabled = true;
+    }
+    function disableChannel1HourCtrlB()
+    {
+      document.getElementById("startHourChn1B").disabled = true;
+      document.getElementById("stopHourChn1B").disabled = true;
+    }
+    function enableChannel1HourCtrlA()
+    {
+      document.getElementById("startHourChn1A").disabled = false;
+      document.getElementById("stopHourChn1A").disabled = false;
+    }
+    function enableChannel1HourCtrlB()
+    {
+      document.getElementById("startHourChn1B").disabled = false;
+      document.getElementById("stopHourChn1B").disabled = false;
+    }
+
+    //--------------------------------------
+    //---- Habilita y deshabilita el canal 1
+    //--------------------------------------
+    function disableChannel1()
+    {
+      $("#outputStateChn1").slider("disable");
+      $("#outputStateChn1").slider("refresh");
+
+      $("#enableChn1HourA").prop("disabled",true).checkboxradio("refresh");
+      $("#enableChn1HourB").prop("disabled",true).checkboxradio("refresh");
+
+      disableChannel1HourCtrlA();
+      disableChannel1HourCtrlB();
+    }
+
+    function enableChannel1()
+    {
+      $("#outputStateChn1").slider("enable");
+      $("#outputStateChn1").slider("refresh");
+
+      $("#enableChn1HourA").prop("disabled",false).checkboxradio("refresh");
+      $("#enableChn1HourB").prop("disabled",false).checkboxradio("refresh");
+
+      updateStatusChn1Hour();
+    }
+
+    //--------------------------------------
+    //Se ejecuta durate la carga de la web
+    //--------------------------------------
+    $(document).on('ready', function()
+    {
+      //--------- Estado inicial del sistema
+      disableChannel1();
+      disableChannel1HourCtrlA();
+      disableChannel1HourCtrlB();
+
+      //--------- Hacemos los bind de las funciones a los controles
+
+      $("#enableChn1").bind( "change", function(event, ui) 
+      {
+        if(document.getElementById("enableChn1").checked)
+          enableChannel1();
+        else
+          disableChannel1();
+      });
+
+      $("#enableChn1HourA").bind( "change", function(event, ui) 
+      {
+        if(document.getElementById("enableChn1HourA").checked)
+          enableChannel1HourCtrlA();
+        else
+          disableChannel1HourCtrlA();
+      });
+
+      $("#enableChn1HourB").bind( "change", function(event, ui) 
+      {
+        if(document.getElementById("enableChn1HourB").checked)
+          enableChannel1HourCtrlB();
+        else
+          disableChannel1HourCtrlB();
+      });
+
+      $("#outputStateChn1").bind( "slidestop", function(event, ui) 
+      {
+        alert("boton de estado cambiado");
+      });
+
+      $("#switchoffBtn").bind( "click", function(event, ui) 
+      {
+        $("#outputStateChn1").val('off').slider("refresh");
+        $("#enableChn1").prop( "checked", false ).checkboxradio( "refresh" );
+      });
+
+      $("#switchonBtn").bind( "click", function(event, ui) 
+      {
+        $("#outputStateChn1").val('on').slider("refresh");
+        $("#enableChn1").prop( "checked", true ).checkboxradio( "refresh" );
+      });
+
+    });
+
+    //Se ejecuta cada vez que hay un evento sobre los 
+    // elementos que deriban de demo-test-time
+    $(function () 
+    {
+      $('.demo-test-time').scroller('destroy').scroller($.extend(
+      {
+        preset: 'time'
+      }
+      ,
+      {
+        theme:'jqm',
+        mode: 'scroller',
+        lang: '',
+        display: 'bubble',
+        animate: ''
+      }));
+
+      $('.demo-time').show();
+    });
+
+  </script>
+    
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+
+  <style>
+
+    /*esto es para eliminar los textbox*/
+    /*input.ui-slider-input 
+    {
+        display : none !important;
+    }
+    */
+
+    .channelCtrl
+    {
+      border:2px solid #a1a1a1;
+      padding:0px 10px;
+      border-radius:12px;
+      box-shadow: 10px 10px 5px #111111;
+    }
+
+  </style>
+
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+  <!-- ///////////////////////////////////////////////////////////// -->
+
+
+  <body>
+    <div data-role="page" data-theme="a">
+      <div data-role="header" data-theme="a">
+        <h2>Domo | WebioPI</h2>
+      </div>
+
+      <!-- //////////////////  -->
+
+      <div data-role="content" data-theme="a">
+        <div class = "channelCtrl" style=" ">
+
+          <!-- ***********  -->
+
+          <div class="ui-grid-a" style = "text-align: center;">
+            <div class="ui-block-a" style = "text-align: left;">
+              <label><input type="checkbox" id="enableChn1" />Channel One</label>
+            </div>
+            <div class="ui-block-b" style = "text-align: right;">
+              <select name="outputStateChn1" id="outputStateChn1" data-role="slider" onclick= "stateCtrl1Func()">
+                <option value="off">Off</option>
+                <option value="on">On</option>
+              </select>
+            </div>
+          </div>  
+
+          <!-- ***********  -->        
+
+          <div class="settings" >
+            <div class="ui-grid-c" style = "text-align: center;">
+              <div class="ui-block-a" style= "width:10%;">
+              </div>
+              <div class="ui-block-b">
+                <label><input type="checkbox" name="enableChn1HourA" id="enableChn1HourA"/> Enable </label>
+              </div>
+              <div class="ui-block-c" >
+                <input type="text" name="startHourChn1A" id="startHourChn1A" value="" class="demo-test-time"  style = "text-align: center;" />
+              </div>        
+              <div class=" ui-block-d ">
+                <input type="text" name="stopHourChn1A" id="stopHourChn1A" value="" class="demo-test-time" style = "text-align: center;" />
+              </div>
+            </div>
+
+            <div class="ui-grid-c" style = "text-align: center;">
+              <div class="ui-block-a" style= "width:10%;">
+              </div>
+              <div class="ui-block-b">
+                <label><input type="checkbox" name="enableChn1HourB" id="enableChn1HourB"/> Enable </label>
+              </div>
+              <div class="ui-block-c" >
+                <input type="text" name="startHourChn1B" id="startHourChn1B" value="" class="demo-test-time"  style = "text-align: center;" />
+              </div>        
+              <div class=" ui-block-d ">
+                <input type="text" name="stopHourChn1B" id="stopHourChn1B" value="" class="demo-test-time" style = "text-align: center;" />
+              </div>
+            </div>     
+          </div>
+        </div>
+
+        <div>
+          <br><br><br>
+          <div>
+            <button id = "switchonBtn" >Check On</button>
+            <button id = "switchoffBtn" >Uncheck Off</button>
+          </div> 
+        </div>
+      </div>
+
+      <!-- //////////////////  -->
+
+      <div data-role="footer">
+          <h1>Powered by TT</h1>
+      </div>
+
+      <!-- //////////////////  -->
+
+    </div>  <!-- div page -->
+  </body>
+</html>    
+

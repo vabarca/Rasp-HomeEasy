@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
+        <title>Domo | WebIOPi</title>
+        <script type="text/javascript" src="/webiopi.js"></script>
+        <script type="text/javascript">
+        webiopi().ready(function() 
+        {
+                var content, button;
+                content = $("#content");
+                        
+                // create a button which call heater_on
+                button = webiopi().createMacroButton("macro", "ON 1",  "on_1");
+                content.append(button); // append button to content div
+                
+                // create a button which call heater_off
+                button = webiopi().createMacroButton("macro", "OFF 1", "off_1");
+                content.append(button); // append button to content div
+
+                // create a button which call heater_on
+                button = webiopi().createMacroButton("macro", "ON 2",  "on_2");
+                content.append(button); // append button to content div
+                
+                // create a button which call heater_off
+                button = webiopi().createMacroButton("macro", "OFF 2", "off_2");
+                content.append(button); // append button to content div
+
+                // create a button which call heater_on
+                button = webiopi().createMacroButton("macro", "ON 3",  "on_3");
+                content.append(button); // append button to content div
+                
+                // create a button which call heater_off
+                button = webiopi().createMacroButton("macro", "OFF 3", "off_3");
+                content.append(button); // append button to content div
+
+                // create a button which call heater_on
+                button = webiopi().createMacroButton("macro", "ON 4",  "on_4");
+                content.append(button); // append button to content div
+                
+                // create a button which call heater_off
+                button = webiopi().createMacroButton("macro", "OFF 4", "off_4");
+                content.append(button); // append button to content div
+
+                // create a button which call heater_on
+                button = webiopi().createMacroButton("macro", "ON M",  "on_M");
+                content.append(button); // append button to content div
+                
+                // create a button which call heater_off
+                button = webiopi().createMacroButton("macro", "OFF M", "off_M");
+                content.append(button); // append button to content div
+
+                // you can also create a simple button with your own function 
+                button = webiopi().createButton("macro2", "Folder", getFolder);
+                content.append(button); // append button to content div
+                
+        });
+
+        function getFolder() {
+                var args = [] // or whatever you want
+                // call myMacroWithArgs(arg)
+                webiopi().callMacro("get_Folder", args, macroCallBack);
+        }
+
+        function macroCallBack(macro, args, data) 
+        {
+                alert(macro + " returned with " + data);
+        }
+                
+        </script>
+        <style type="text/css">
+                button {
+                        display: block;
+                        margin: 5px 5px 5px 5px;
+                        width: 150px;
+                        height: 45px;
+                        font-size: 12pt;
+                        font-weight: bold;
+                        color: black;
+                }
+                
+                input[type="range"] {
+                        display: block;
+                        width: 160px;
+                        height: 45px;
+                }
+                
+        </style>
+</head>
+<body>
+        <div id="content" align="center"></div>
+</body>
+</html>
